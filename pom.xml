@@ -75,7 +75,7 @@
         <dependency>
             <groupId>org.apache.httpcomponents</groupId>
             <artifactId>fluent-hc</artifactId>
-            <version>4.3.6</version>
+            <version>opentracing-poc</version>
         </dependency>
         <dependency>
             <groupId>org.springframework.boot</groupId>
@@ -130,7 +130,12 @@
         <dependency>
             <groupId>com.instana</groupId>
             <artifactId>instana-java-opentracing</artifactId>
-            <version>0.100.500</version>
+            <version>opentracing-poc</version>
+        </dependency>
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-apache-httpclient</artifactId>
+            <version>0.0.2</version>
         </dependency>
     </dependencies>
 
