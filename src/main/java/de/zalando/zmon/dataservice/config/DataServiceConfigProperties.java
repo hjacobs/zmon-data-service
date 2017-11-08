@@ -52,7 +52,7 @@ public class DataServiceConfigProperties {
     private int kairosdbTimeout = 1000;
     private int kairosdbSockettimeout = 500;
     private boolean kairosdbEnabled = true;
-    private boolean datapointsRedisEnabled = false;
+    private boolean datapointsRedisEnabled = true;
 
     private String dataProxyUrl = null;
     private int dataProxyConnections = 50;
