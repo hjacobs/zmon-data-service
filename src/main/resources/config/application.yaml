@@ -12,7 +12,7 @@ server:
     mime-types: "application/json,application/xml,text/html,text/xml,text/plain,text/css,application/javascript"
 
 dataservice:
-  redis-host: localhost
+  redis-host: a34e6d909c3dc11e7a6b70249bf77341-678114054.eu-central-1.elb.amazonaws.com
   redis-port: 6379
   oauth2-token-info-url: ${TOKENINFO_URL:http://localhost:10080/oauth2/tokeninfo}
   kairosdb-write-urls:
@@ -31,3 +31,16 @@ spring:
       max-active: 10
       max-idle: 4
       min-idle: 2
+
+logging:
+  level:
+    org.springframework.web: ERROR
+    de.zalando.zmon.dataservice: DEBUG
+  pattern:
+    console: "%d{yyyy-MM-dd HH:mm:ss} - %msg%n"
+    file: "%d{yyyy-MM-dd HH:mm:ss} [%thread] %-5level %logger{36} - %msg%n"
+  file: /tmp/application.log
+
+queue:
+  endpoint: https://sqs.eu-central-1.amazonaws.com/698989930785/zmon-data-consumer
+  name: zmon-data-consumer

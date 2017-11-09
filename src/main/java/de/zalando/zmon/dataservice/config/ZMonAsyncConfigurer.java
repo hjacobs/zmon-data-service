@@ -8,6 +8,7 @@ import java.util.concurrent.ThreadPoolExecutor;
 
 import de.zalando.zmon.dataservice.data.KairosDbWorkResultWriter;
 import de.zalando.zmon.dataservice.data.RedisWorkerResultWriter;
+import de.zalando.zmon.dataservice.data.SqsResultWriter;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -56,6 +57,11 @@ public class ZMonAsyncConfigurer extends AsyncConfigurerSupport {
     @Bean(KairosDbWorkResultWriter.KAIROS_WRITER_EXECUTOR)
     public Executor kairosWriterExecutor() {
         return createExecutor("kairos");
+    }
+
+    @Bean(SqsResultWriter.SQS_WRITER_EXECUTOR)
+    public Executor sqsWriterExecutor() {
+        return createExecutor("sqs");
     }
 
     private Executor createExecutor(final String name) {
