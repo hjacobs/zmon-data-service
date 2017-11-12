@@ -31,6 +31,7 @@ import com.google.common.collect.Lists;
 import de.zalando.zmon.dataservice.ZMonEventType;
 import de.zalando.zmon.dataservice.components.DefaultObjectMapper;
 import redis.clients.jedis.Jedis;
+import redis.clients.jedis.JedisCluster;
 import redis.clients.jedis.JedisPool;
 import redis.clients.jedis.Pipeline;
 
@@ -46,7 +47,9 @@ public class RedisDataStore {
 
     private static final String SERIALIZE_FAILED = "{\"value\": \"Serialize failed\"}";
 
-    private final JedisPool pool;
+    //private final JedisPool pool;
+
+    private final JedisCluster cluster;
 
     private final ObjectMapper mapper;
 
@@ -59,13 +62,14 @@ public class RedisDataStore {
     private final RedisScript<Long> checkAlertScript;
 
     @Autowired
-    public RedisDataStore(JedisPool pool, @DefaultObjectMapper ObjectMapper mapper,
+    public RedisDataStore(JedisCluster cluster, @DefaultObjectMapper ObjectMapper mapper,
             StringRedisTemplate stringRedisTemplate, HttpEventLogger eventLogger) {
-        this.pool = pool;
+        //this.pool = pool;
         this.mapper = mapper;
         this.stringRedisTemplate = stringRedisTemplate;
         this.checkAlertScript = initializeScript();
         this.eventLogger = eventLogger;
+        this.cluster = cluster;
     }
 
     private static RedisScript<Long> initializeScript() {
@@ -83,11 +87,16 @@ public class RedisDataStore {
          * TimeUnit.SECONDS);
          */
 
-        try (Jedis jedis = pool.getResource()){
+        /*try (Jedis jedis = pool.getResource()){
             String key = "zmon:trial_run:" + requestId + ":results";
             jedis.hset(key, id, result);
             jedis.expire(key, 300);
-        }
+        }*/
+
+        //Below code added to replace Jedispool by JedisCluster connection
+        String key = "zmon:trial_run:" + requestId + ":results";
+        cluster.hset(key, id, result);
+        cluster.expire(key, 300);
     }
 
     public void createEvents(String entity, int checkId, String checkValue, AlertData ad) {
@@ -103,18 +112,16 @@ public class RedisDataStore {
     }
 
     public void store(WorkerResult wr) {
-        try (Jedis jedis = pool.getResource()){
-
-            Pipeline p = jedis.pipelined();
+        try {
 
             for (CheckData cd : wr.results) {
-                p.sadd("zmon:checks", "" + cd.check_id);
-                p.sadd("zmon:checks:" + cd.check_id, cd.entity_id);
+                cluster.sadd("zmon:checks", "" + cd.check_id);
+                cluster.sadd("zmon:checks:" + cd.check_id, cd.entity_id);
                 String checkTs = "zmon:checks:" + cd.check_id + ":" + cd.entity_id;
 
                 String checkValue = writeValueAsString(cd.check_result).orElse(EMPTY_CHECK);
-                p.lpush(checkTs, checkValue);
-                p.ltrim(checkTs, 0, 2);
+                cluster.lpush(checkTs, checkValue);
+                cluster.ltrim(checkTs, 0, 2);
 
                 if (null != cd.alerts) {
                     for (AlertData alert : cd.alerts.values()) {
@@ -122,31 +129,33 @@ public class RedisDataStore {
                         createEvents(cd.entity_id, cd.check_id, checkValue, alert);
 
                         if (alert.active && alert.in_period) {
-                            p.sadd("zmon:alerts:" + alert.alert_id, cd.entity_id);
+                            cluster.sadd("zmon:alerts:" + alert.alert_id, cd.entity_id);
 
                             String value = buildValue(alert, cd);
 
-                            p.set("zmon:alerts:" + alert.alert_id + ":" + cd.entity_id, value);
+                            cluster.set("zmon:alerts:" + alert.alert_id + ":" + cd.entity_id, value);
 
                         } else {
-                            p.srem("zmon:alerts:" + alert.alert_id, cd.entity_id);
-                            p.del("zmon:alerts:" + alert.alert_id + ":" + cd.entity_id);
+                            cluster.srem("zmon:alerts:" + alert.alert_id, cd.entity_id);
+                            cluster.del("zmon:alerts:" + alert.alert_id + ":" + cd.entity_id);
                         }
 
                         String captures = writeValueAsString(alert.captures).orElse(CAPTURES_NOT_SERIALIZED);
 
-                        p.hset("zmon:alerts:" + alert.alert_id + ":entities", cd.entity_id, captures);
+                        cluster.hset("zmon:alerts:" + alert.alert_id + ":entities", cd.entity_id, captures);
 
-                        p.eval("if table.getn(redis.call('smembers','zmon:alerts:" + alert.alert_id + "')) == 0 then " +
+                        cluster.eval("if table.getn(redis.call('smembers','zmon:alerts:" + alert.alert_id + "')) == 0 then " +
                                     "redis.call('srem','zmon:alert-acks', " + alert.alert_id + "); " +
                                     "return redis.call('srem','zmon:alerts'," + alert.alert_id + ") " +
                                 "else " +
                                     "return redis.call('sadd','zmon:alerts'," + alert.alert_id + ") " +
-                                "end");
+                                "end", "zmon:alerts" + alert.alert_id);
                     }
                 }
             }
-            p.sync();
+        }catch (Exception e){
+            System.err.println("Print stack trace:");
+            e.printStackTrace();
         }
     }
 

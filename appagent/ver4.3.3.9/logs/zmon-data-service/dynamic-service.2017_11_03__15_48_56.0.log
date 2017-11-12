@@ -1,0 +1,5 @@
+[Thread-0] 03 Nov 2017 15:48:57,966  INFO com.singularity.dynamicservice.DynamicServiceManager - Scheduling DynamicServiceManager at interval of 30 seconds
+[AD Thread Pool-Global0] 03 Nov 2017 15:49:27,971  INFO com.singularity.dynamicservice.DynamicServiceManager - Using services directories [/Users/vgoyal/Documents/appdagents/appagent/ver4.3.3.9/external-services, /Users/vgoyal/Documents/appdagents/appagent/ver4.3.3.9/external-services/zmon-data-service]
+[AD Thread Pool-Global0] 03 Nov 2017 15:49:27,972  INFO com.singularity.dynamicservice.DynamicServiceManager - Mbean registration failed or not ready
+[AD Thread Pool-Global1] 03 Nov 2017 15:50:57,978  INFO com.singularity.dynamicservice.DynamicServiceMBeanManager - MBean AppDynamics:type=DynamicServiceManager is registered
+[AD Thread Pool-Global1] 03 Nov 2017 15:50:57,984  INFO com.singularity.dynamicservice.DynamicServiceManager - Service class name com.singularity.ee.service.analytics.Analytics
