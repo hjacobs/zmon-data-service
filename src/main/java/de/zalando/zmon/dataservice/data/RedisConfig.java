@@ -31,17 +31,12 @@ public class RedisConfig {
 
         JedisPoolConfig poolConfig = new JedisPoolConfig();
         poolConfig.setTestOnBorrow(true);
-        poolConfig.setMaxTotal(20);
+        poolConfig.setMaxTotal(config.getRedisPoolSize());
 
         Set<HostAndPort> jedisClusterNodes = new HashSet<HostAndPort>();
 
         //Jedis cluster will attempt to discover cluster nodes automatically
-        jedisClusterNodes.add(new HostAndPort("127.0.0.1", 30001));
-        jedisClusterNodes.add(new HostAndPort("127.0.0.1", 30002));
-        jedisClusterNodes.add(new HostAndPort("127.0.0.1", 30003));
-        jedisClusterNodes.add(new HostAndPort("127.0.0.1", 30004));
-        jedisClusterNodes.add(new HostAndPort("127.0.0.1", 30005));
-        jedisClusterNodes.add(new HostAndPort("127.0.0.1", 30006));
+        jedisClusterNodes.add(new HostAndPort(config.getRedisHost(), config.getRedisPort()));
         JedisCluster jc = new JedisCluster(jedisClusterNodes, poolConfig);
 
         log.debug("Cluster Nodes " + jc.getClusterNodes().toString());
