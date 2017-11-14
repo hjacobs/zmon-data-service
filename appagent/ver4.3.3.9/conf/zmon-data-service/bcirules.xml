@@ -1,6 +1,0 @@
-<multiple-inheritance-rules>
-    <instrumentation-properties>
-        <property name="dynamic-servlet-classes" value="org.springframework.web.servlet.FrameworkServlet"/>
-        <property name="bci-fixer-other-classes" value="org.springframework.security.web.savedrequest.SavedRequestAwareWrapper,io.undertow.servlet.spec.HttpServletRequestImpl,io.undertow.server.handlers.resource.PathResource$1TransferTask,io.undertow.server.handlers.resource.PathResource$1ServerTask,org.springframework.security.web.util.OnCommittedResponseWrapper"/>
-    </instrumentation-properties>
-</multiple-inheritance-rules>
