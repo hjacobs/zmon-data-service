@@ -60,5 +60,3 @@ public class LightstepConfiguration {
                         .build());
     }
 }
-
-// lightstep-collector-grpc.stups-test.zalan.do 443
