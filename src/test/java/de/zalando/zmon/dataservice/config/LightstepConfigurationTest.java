@@ -19,6 +19,7 @@ import static org.junit.Assert.assertThat;
         "tracing.lightstep.collector_host=iamthedomain",
         "tracing.lightstep.collector_port=8088",
         "tracing.lightstep.collector_protocol=http",
+        "tracing.lightstep.component_name=data-foo",
 })
 public class LightstepConfigurationTest {
 
@@ -31,6 +32,7 @@ public class LightstepConfigurationTest {
         assertThat(config.getCollectorHost(), is("iamthedomain"));
         assertThat(config.getCollectorPort(), is(8088));
         assertThat(config.getCollectorProtocol(), is("http"));
+        assertThat(config.getComponentName(), is("data-foo"));
     }
 
     @Configuration

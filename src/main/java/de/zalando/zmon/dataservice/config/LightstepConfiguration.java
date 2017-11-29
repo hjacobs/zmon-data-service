@@ -10,11 +10,11 @@ import java.net.MalformedURLException;
 @Configuration
 @ConfigurationProperties(prefix = "tracing.lightstep")
 public class LightstepConfiguration {
-    private final static String TRACER_COMPONENT_NAME = "zmon-data-service";
     private String accessToken;
     private String collectorHost = "localhost";
     private int collectorPort = 443;
     private String collectorProtocol = "https";
+    private String componentName = "data-service";
 
     public String getAccessToken() {
         return accessToken;
@@ -48,6 +48,14 @@ public class LightstepConfiguration {
         this.collectorProtocol = collectorProtocol;
     }
 
+    public String getComponentName() {
+        return componentName;
+    }
+
+    public void setComponentName(final String componentName) {
+        this.componentName = componentName;
+    }
+
     @Bean
     public Tracer lightstepTracer() throws MalformedURLException {
         return new com.lightstep.tracer.jre.JRETracer(
@@ -56,7 +64,7 @@ public class LightstepConfiguration {
                         .withCollectorHost(collectorHost)
                         .withCollectorPort(collectorPort)
                         .withCollectorProtocol(collectorProtocol)
-                        .withComponentName(TRACER_COMPONENT_NAME)
+                        .withComponentName(componentName)
                         .build());
     }
 }
