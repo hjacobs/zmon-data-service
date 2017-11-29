@@ -10,7 +10,7 @@ import java.net.MalformedURLException;
 @Configuration
 @ConfigurationProperties(prefix = "tracing.lightstep")
 public class LightstepConfiguration {
-    private final static String TRACER_COMPONENT_NAME = "data-service";
+    private final static String TRACER_COMPONENT_NAME = "zmon-data-service";
     private String accessToken;
     private String collectorHost = "localhost";
     private int collectorPort = 443;
