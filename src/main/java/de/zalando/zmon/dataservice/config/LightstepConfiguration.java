@@ -1,6 +1,7 @@
 package de.zalando.zmon.dataservice.config;
 
 import io.opentracing.Tracer;
+import io.opentracing.util.GlobalTracer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
@@ -58,7 +59,7 @@ public class LightstepConfiguration {
 
     @Bean
     public Tracer lightstepTracer() throws MalformedURLException {
-        return new com.lightstep.tracer.jre.JRETracer(
+        Tracer tracer = new com.lightstep.tracer.jre.JRETracer(
                 new com.lightstep.tracer.shared.Options.OptionsBuilder()
                         .withAccessToken(accessToken)
                         .withCollectorHost(collectorHost)
@@ -66,5 +67,9 @@ public class LightstepConfiguration {
                         .withCollectorProtocol(collectorProtocol)
                         .withComponentName(componentName)
                         .build());
+
+        GlobalTracer.register(tracer);
+
+        return tracer;
     }
 }

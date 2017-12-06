@@ -140,6 +140,11 @@
             <artifactId>opentracing-spring-cloud-starter</artifactId>
             <version>0.0.7</version>
         </dependency>
+        <dependency>
+            <groupId>io.opentracing.contrib</groupId>
+            <artifactId>opentracing-apache-httpclient</artifactId>
+            <version>0.0.2</version>
+        </dependency>
     </dependencies>
 
     <build>
