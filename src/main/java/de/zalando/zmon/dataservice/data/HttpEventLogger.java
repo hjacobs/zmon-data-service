@@ -1,5 +1,6 @@
 package de.zalando.zmon.dataservice.data;
 
+import com.uber.jaeger.context.TracingUtils;
 import de.zalando.zmon.dataservice.DataServiceMetrics;
 import de.zalando.zmon.dataservice.EventType;
 import de.zalando.zmon.dataservice.config.DataServiceConfigProperties;
@@ -69,8 +70,15 @@ public class HttpEventLogger {
         if (enabled) {
             forwardUrl = config.getEventlogUrl() + "/api/v1";
             log.info("EventLog enabled: {}", forwardUrl);
-            executor = Executor.newInstance(ProxyWriter.getHttpClient(config.getEventlogSocketTimeout(), config.getEventlogTimeout(), config.getEventlogConnections()));
-            ExecutorService threadPool = Executors.newFixedThreadPool(config.getEventlogPoolSize());
+            executor = Executor.newInstance(
+                            ProxyWriter.getHttpClient(
+                                    config.getEventlogSocketTimeout(),
+                                    config.getEventlogTimeout(),
+                                    config.getEventlogConnections()));
+
+            ExecutorService threadPool = TracingUtils.tracedExecutor(
+                    Executors.newFixedThreadPool(config.getEventlogPoolSize()));
+
             async = Async.newInstance().use(threadPool).use(executor);
         } else {
             log.info("EventLog disabled");

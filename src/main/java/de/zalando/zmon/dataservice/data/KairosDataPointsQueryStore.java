@@ -37,8 +37,11 @@ public class KairosDataPointsQueryStore implements DataPointsQueryStore {
 
         LOG.info("KairosDB settings connections={} socketTimeout={} timeout={}", config.getKairosdbConnections(),
                 config.getKairosdbSockettimeout(), config.getKairosdbTimeout());
-        executor = Executor.newInstance(getHttpClient(config.getKairosdbSockettimeout(), config.getKairosdbTimeout(),
-                config.getKairosdbConnections()));
+        executor = Executor.newInstance(
+                getHttpClient(
+                        config.getKairosdbSockettimeout(),
+                        config.getKairosdbTimeout(),
+                        config.getKairosdbConnections()));
     }
 
     private static HttpClient getHttpClient(int socketTimeout, int timeout, int maxConnections) {

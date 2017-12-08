@@ -1,5 +1,6 @@
 package de.zalando.zmon.dataservice.data;
 
+import com.uber.jaeger.context.TracingUtils;
 import io.opentracing.contrib.apache.http.client.TracingHttpClientBuilder;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -9,7 +10,6 @@ import org.apache.http.client.fluent.Executor;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.concurrent.FutureCallback;
 import org.apache.http.entity.ContentType;
-import org.apache.http.impl.client.HttpClients;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,8 +42,12 @@ public class ProxyWriter {
 
         if (null != forwardUrl) {
             log.info("Forwarding data to: {}", this.forwardUrl);
-            executor = Executor.newInstance(getHttpClient(config.getDataProxySocketTimeout(), config.getDataProxyTimeout(), config.getDataProxyConnections()));
-            ExecutorService threadpool = Executors.newFixedThreadPool(config.getDataProxyPoolSize());
+            executor = Executor.newInstance(
+                    getHttpClient(config.getDataProxySocketTimeout(), config.getDataProxyTimeout(), config.getDataProxyConnections()));
+
+            ExecutorService threadpool = TracingUtils.tracedExecutor(
+                    Executors.newFixedThreadPool(config.getDataProxyPoolSize()));
+
             async = Async.newInstance().use(threadpool).use(executor);
         }
         else {

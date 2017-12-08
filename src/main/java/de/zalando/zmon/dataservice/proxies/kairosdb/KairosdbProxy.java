@@ -44,7 +44,7 @@ public class KairosdbProxy {
 
     public static HttpClient getHttpClient(int socketTimeout, int timeout, int maxConnections) {
         RequestConfig config = RequestConfig.custom().setSocketTimeout(socketTimeout).setConnectTimeout(timeout).build();
-        return new TracingHttpClientBuilder().setMaxConnPerRoute(maxConnections).setMaxConnTotal(maxConnections).setDefaultRequestConfig(config).build();
+        return HttpClients.custom().setMaxConnPerRoute(maxConnections).setMaxConnTotal(maxConnections).setDefaultRequestConfig(config).build();
     }
 
     @Autowired
