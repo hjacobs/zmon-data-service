@@ -1,6 +1,5 @@
 package de.zalando.zmon.dataservice.data;
 
-import com.uber.jaeger.context.TracingUtils;
 import io.opentracing.contrib.apache.http.client.TracingHttpClientBuilder;
 import org.apache.http.client.HttpClient;
 import org.apache.http.client.config.RequestConfig;
@@ -45,8 +44,7 @@ public class ProxyWriter {
             executor = Executor.newInstance(
                     getHttpClient(config.getDataProxySocketTimeout(), config.getDataProxyTimeout(), config.getDataProxyConnections()));
 
-            ExecutorService threadpool = TracingUtils.tracedExecutor(
-                    Executors.newFixedThreadPool(config.getDataProxyPoolSize()));
+            ExecutorService threadpool = Executors.newFixedThreadPool(config.getDataProxyPoolSize());
 
             async = Async.newInstance().use(threadpool).use(executor);
         }

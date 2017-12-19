@@ -6,7 +6,6 @@ import java.util.Map;
 import java.util.concurrent.ExecutorService;
 import java.util.concurrent.Executors;
 
-import com.uber.jaeger.context.TracingUtils;
 import org.apache.http.client.fluent.Async;
 import org.apache.http.client.fluent.Request;
 import org.apache.http.entity.ContentType;
@@ -34,7 +33,7 @@ public class AppMetricsClient {
 
     private final ObjectMapper mapper;
 
-    private final ExecutorService asyncExecutorPool = TracingUtils.tracedExecutor(Executors.newFixedThreadPool(15));
+    private final ExecutorService asyncExecutorPool = Executors.newFixedThreadPool(15);
 
     private final Async async;
 

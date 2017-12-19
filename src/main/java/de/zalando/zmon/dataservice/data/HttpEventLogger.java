@@ -1,6 +1,5 @@
 package de.zalando.zmon.dataservice.data;
 
-import com.uber.jaeger.context.TracingUtils;
 import de.zalando.zmon.dataservice.DataServiceMetrics;
 import de.zalando.zmon.dataservice.EventType;
 import de.zalando.zmon.dataservice.config.DataServiceConfigProperties;
@@ -76,8 +75,7 @@ public class HttpEventLogger {
                                     config.getEventlogTimeout(),
                                     config.getEventlogConnections()));
 
-            ExecutorService threadPool = TracingUtils.tracedExecutor(
-                    Executors.newFixedThreadPool(config.getEventlogPoolSize()));
+            ExecutorService threadPool = Executors.newFixedThreadPool(config.getEventlogPoolSize());
 
             async = Async.newInstance().use(threadPool).use(executor);
         } else {

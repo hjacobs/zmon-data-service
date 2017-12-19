@@ -2,10 +2,8 @@ package de.zalando.zmon.dataservice.config;
 
 import java.util.concurrent.*;
 
-import com.uber.jaeger.context.TracingUtils;
 import de.zalando.zmon.dataservice.data.KairosDbWorkResultWriter;
 import de.zalando.zmon.dataservice.data.RedisWorkerResultWriter;
-import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.aop.interceptor.AsyncUncaughtExceptionHandler;
@@ -14,7 +12,6 @@ import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.scheduling.annotation.AsyncConfigurerSupport;
 import org.springframework.scheduling.annotation.EnableAsync;
-import org.springframework.scheduling.concurrent.ThreadPoolExecutorFactoryBean;
 import org.springframework.scheduling.concurrent.ThreadPoolTaskExecutor;
 
 import com.codahale.metrics.Gauge;
@@ -32,17 +29,10 @@ public class ZMonAsyncConfigurer extends AsyncConfigurerSupport {
     private final DataServiceConfigProperties properties;
     private final MetricRegistry metricRegistry;
 
-    @SuppressWarnings("unused") //  Forcing initialization order.
-    private final Tracer tracer;
-
-    public ZMonAsyncConfigurer(
-            final DataServiceConfigProperties properties,
-            final MetricRegistry metricRegistry,
-            final Tracer tracer) {
+    public ZMonAsyncConfigurer(final DataServiceConfigProperties properties, final MetricRegistry metricRegistry) {
 
         this.properties = properties;
         this.metricRegistry = metricRegistry;
-        this.tracer = tracer;
     }
 
     @Override
@@ -72,30 +62,13 @@ public class ZMonAsyncConfigurer extends AsyncConfigurerSupport {
         final int maxSize = config.getMaxSize();
 
         LOG.info("Creating Async executor={} with core-size={} max-size={} queue-size={}", name, coreSize, maxSize, queueSize);
-//        final ThreadPoolTaskExecutor executor = new CustomizableThreadPoolTaskExecutor(taskExecutorQueue(queueSize, name));
-//        executor.setCorePoolSize(coreSize);
-//        executor.setMaxPoolSize(maxSize);
-//        executor.setQueueCapacity(queueSize); // will be ignored
-//        executor.setThreadNamePrefix(String.format("zmon-async-%s-", name));
-//        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
-//        executor.initialize();
-
-//        final ThreadPoolExecutorFactoryBean factory = new ThreadPoolExecutorFactoryBean();
-//        factory.setCorePoolSize(coreSize);
-//        factory.setMaxPoolSize(maxSize);
-//        factory.setQueueCapacity(queueSize);
-//        factory.setThreadNamePrefix(String.format("zmon-async-%s-", name));
-//        factory.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
-
-//        ExecutorService executor = TracingUtils.tracedExecutor(factory.getObject());
-
-//        return new ThreadPoolExecutor(corePoolSize, maxPoolSize,
-//                keepAliveSeconds, TimeUnit.SECONDS, queue, threadFactory, rejectedExecutionHandler);
-//
-        LinkedBlockingQueue<Runnable> queue = taskExecutorQueue(queueSize, name);
-        ThreadPoolExecutor executor = new ThreadPoolExecutor(
-                coreSize, maxSize, 60, TimeUnit.SECONDS, queue, new ThreadPoolExecutor.DiscardOldestPolicy());
-        //return TracingUtils.tracedExecutor(executor);
+        final ThreadPoolTaskExecutor executor = new CustomizableThreadPoolTaskExecutor(taskExecutorQueue(queueSize, name));
+        executor.setCorePoolSize(coreSize);
+        executor.setMaxPoolSize(maxSize);
+        executor.setQueueCapacity(queueSize); // will be ignored
+        executor.setThreadNamePrefix(String.format("zmon-async-%s-", name));
+        executor.setRejectedExecutionHandler(new ThreadPoolExecutor.DiscardOldestPolicy());
+        executor.initialize();
         return executor;
     }
 

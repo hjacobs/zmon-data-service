@@ -1,9 +1,6 @@
 package de.zalando.zmon.dataservice.config;
 
-import io.opentracing.Tracer;
-import io.opentracing.util.GlobalTracer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
-import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
 @Configuration
@@ -14,25 +11,25 @@ public class TracingConfiguration {
     private int samplerParam;
     private String serviceName;
 
-    @Bean
-    public Tracer tracer() {
-
-        if (!GlobalTracer.isRegistered()) {
-            com.uber.jaeger.Configuration.SamplerConfiguration samplerConfiguration
-                    = new com.uber.jaeger.Configuration.SamplerConfiguration(samplerType, samplerParam);
-
-            com.uber.jaeger.Configuration.ReporterConfiguration reporterConfiguration
-                    = com.uber.jaeger.Configuration.ReporterConfiguration.fromEnv();
-
-            com.uber.jaeger.Configuration configuration
-                    = new com.uber.jaeger.Configuration(serviceName, samplerConfiguration, reporterConfiguration);
-
-            Tracer tracer = configuration.getTracer();
-            GlobalTracer.register(tracer);
-        }
-
-        return GlobalTracer.get();
-    }
+//    @Bean
+//    public Tracer tracer() {
+//
+//        if (!GlobalTracer.isRegistered()) {
+//            com.uber.jaeger.Configuration.SamplerConfiguration samplerConfiguration
+//                    = new com.uber.jaeger.Configuration.SamplerConfiguration(samplerType, samplerParam);
+//
+//            com.uber.jaeger.Configuration.ReporterConfiguration reporterConfiguration
+//                    = com.uber.jaeger.Configuration.ReporterConfiguration.fromEnv();
+//
+//            com.uber.jaeger.Configuration configuration
+//                    = new com.uber.jaeger.Configuration(serviceName, samplerConfiguration, reporterConfiguration);
+//
+//            Tracer tracer = configuration.getTracer();
+//            GlobalTracer.register(tracer);
+//        }
+//
+//        return GlobalTracer.get();
+//    }
 
     public String getSamplerType() {
         return samplerType;
