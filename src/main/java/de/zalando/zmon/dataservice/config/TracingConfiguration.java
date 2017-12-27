@@ -1,57 +1,71 @@
 package de.zalando.zmon.dataservice.config;
 
+import io.opentracing.Tracer;
 import org.springframework.boot.context.properties.ConfigurationProperties;
+import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 
+import java.net.MalformedURLException;
+
 @Configuration
-@ConfigurationProperties("jaeger")
+@ConfigurationProperties("tracing.lightstep")
 public class TracingConfiguration {
 
-    private String samplerType;
-    private int samplerParam;
-    private String serviceName;
+    private String componentName = "zmon-data-service";
+    private String accessToken;
+    private String collectorHost = "localhost";
+    private int collectorPort = 443;
+    private String collectorProtocol = "https";
 
-//    @Bean
-//    public Tracer tracer() {
-//
-//        if (!GlobalTracer.isRegistered()) {
-//            com.uber.jaeger.Configuration.SamplerConfiguration samplerConfiguration
-//                    = new com.uber.jaeger.Configuration.SamplerConfiguration(samplerType, samplerParam);
-//
-//            com.uber.jaeger.Configuration.ReporterConfiguration reporterConfiguration
-//                    = com.uber.jaeger.Configuration.ReporterConfiguration.fromEnv();
-//
-//            com.uber.jaeger.Configuration configuration
-//                    = new com.uber.jaeger.Configuration(serviceName, samplerConfiguration, reporterConfiguration);
-//
-//            Tracer tracer = configuration.getTracer();
-//            GlobalTracer.register(tracer);
-//        }
-//
-//        return GlobalTracer.get();
-//    }
-
-    public String getSamplerType() {
-        return samplerType;
+    public String getComponentName() {
+        return componentName;
     }
 
-    public void setSamplerType(String samplerType) {
-        this.samplerType = samplerType;
+    public void setComponentName(final String componentName) {
+        this.componentName = componentName;
     }
 
-    public int getSamplerParam() {
-        return samplerParam;
+    public String getAccessToken() {
+        return accessToken;
     }
 
-    public void setSamplerParam(int samplerParam) {
-        this.samplerParam = samplerParam;
+    public void setAccessToken(final String accessToken) {
+        this.accessToken = accessToken;
     }
 
-    public String getServiceName() {
-        return serviceName;
+    public String getCollectorHost() {
+        return collectorHost;
     }
 
-    public void setServiceName(String serviceName) {
-        this.serviceName = serviceName;
+    public void setCollectorHost(final String collectorHost) {
+        this.collectorHost = collectorHost;
+    }
+
+    public int getCollectorPort() {
+        return collectorPort;
+    }
+
+    public void setCollectorPort(final int collectorPort) {
+        this.collectorPort = collectorPort;
+    }
+
+    public String getCollectorProtocol() {
+        return collectorProtocol;
+    }
+
+    public void setCollectorProtocol(final String collectorProtocol) {
+        this.collectorProtocol = collectorProtocol;
+    }
+
+    @Bean
+    public Tracer lightstepTracer() throws MalformedURLException {
+        return new com.lightstep.tracer.jre.JRETracer(
+                new com.lightstep.tracer.shared.Options.OptionsBuilder()
+                        .withAccessToken(accessToken)
+                        .withCollectorHost(collectorHost)
+                        .withCollectorPort(collectorPort)
+                        .withCollectorProtocol(collectorProtocol)
+                        .withComponentName(componentName)
+                        .build());
     }
 }
