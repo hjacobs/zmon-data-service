@@ -78,6 +78,8 @@ public class DataServiceConfigProperties {
 
     private List<Integer> whiteListedChecks = new ArrayList<>();
 
+    private int maxKeys = 10000;
+
     public List<Integer> getwhiteListedChecks() {
         return whiteListedChecks;
     }
@@ -85,7 +87,6 @@ public class DataServiceConfigProperties {
     public void setwhiteListedChecks(List<Integer> whiteListedChecks) {
         this.whiteListedChecks = whiteListedChecks;
     }
-
 
     @NestedConfigurationProperty
     private Map<String, AsyncExecutorProperties> asyncExecutors = new HashMap<>();
@@ -568,6 +569,14 @@ public class DataServiceConfigProperties {
 
     public void setConnectionsTimeToLive(long connectionsTimeToLive) {
         this.connectionsTimeToLive = connectionsTimeToLive;
+    }
+
+    public int getMaxKeys() {
+        return maxKeys;
+    }
+
+    public void setMaxKeys(int maxKeys) {
+        this.maxKeys = maxKeys;
     }
 }
 

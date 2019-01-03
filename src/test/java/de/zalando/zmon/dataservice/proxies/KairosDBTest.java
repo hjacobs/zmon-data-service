@@ -4,6 +4,7 @@ import de.zalando.zmon.dataservice.DataServiceMetrics;
 import de.zalando.zmon.dataservice.config.DataServiceConfigProperties;
 import de.zalando.zmon.dataservice.data.DataPointsQueryStore;
 import de.zalando.zmon.dataservice.data.KairosDBStore;
+import io.opentracing.mock.MockTracer;
 import org.assertj.core.api.Assertions;
 import org.junit.Test;
 
@@ -20,7 +21,7 @@ public class KairosDBTest {
     @Test
     public void testReplace() {
         KairosDBStore store = new KairosDBStore(mock(DataServiceConfigProperties.class), mock(DataServiceMetrics.class),
-                mock(DataPointsQueryStore.class));
+                mock(DataPointsQueryStore.class), new MockTracer());
 
         Map<String, String> entity = new HashMap<>();
         entity.put("id", "host01[aws:1234]");

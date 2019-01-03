@@ -5,6 +5,7 @@ import com.google.common.collect.ImmutableList;
 import de.zalando.zmon.dataservice.AbstractControllerTest;
 import de.zalando.zmon.dataservice.DataServiceMetrics;
 import de.zalando.zmon.dataservice.config.DataServiceConfigProperties;
+import io.opentracing.mock.MockTracer;
 import org.junit.Before;
 import org.junit.Rule;
 import org.junit.Test;
@@ -34,6 +35,8 @@ public class KairosDbStoreTest extends AbstractControllerTest {
     @Autowired
     private DataServiceMetrics metrics;
 
+    private MockTracer tracer = new MockTracer();
+
 
     @Before
     public void setUp() {
@@ -43,7 +46,7 @@ public class KairosDbStoreTest extends AbstractControllerTest {
 
     @Test
     public void writeWorkerResult() {
-        KairosDBStore kairosDb = new KairosDBStore(config, metrics, dataPointsQueryStore);
+        KairosDBStore kairosDb = new KairosDBStore(config, metrics, dataPointsQueryStore, tracer);
         kairosDb.store(Fixture.buildWorkerResult());
         verify(dataPointsQueryStore, atMost(1)).store(anyString());
         verify(metrics, never()).markKairosError();
@@ -52,7 +55,7 @@ public class KairosDbStoreTest extends AbstractControllerTest {
 
     @Test
     public void testInvalidWorkerResult() {
-        KairosDBStore kairosDb = new KairosDBStore(config, metrics, dataPointsQueryStore);
+        KairosDBStore kairosDb = new KairosDBStore(config, metrics, dataPointsQueryStore, tracer);
         for (WorkerResult wr : new WorkerResult[]{null, new WorkerResult()}) {
             kairosDb.store(wr);
             verify(metrics, never()).incKairosDBDataPoints(anyLong());

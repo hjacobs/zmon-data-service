@@ -6,6 +6,8 @@ import com.fasterxml.jackson.databind.node.*;
 import com.google.common.collect.ImmutableSet;
 import de.zalando.zmon.dataservice.DataServiceMetrics;
 import de.zalando.zmon.dataservice.config.DataServiceConfigProperties;
+import io.opentracing.Span;
+import io.opentracing.Tracer;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -37,6 +39,8 @@ public class KairosDBStore {
 
     private static final String REPLACE_CHAR = "_";
     private static final Pattern KAIROSDB_INVALID_TAG_CHARS = Pattern.compile("[?@:=\\[\\]]");
+
+    private Tracer tracer;
 
     public void fillFlatValueMap(Map<String, NumericNode> values, String prefix, JsonNode base) {
         if (base instanceof NumericNode) {
@@ -75,7 +79,7 @@ public class KairosDBStore {
     }
 
     @Autowired
-    public KairosDBStore(DataServiceConfigProperties config, DataServiceMetrics metrics, DataPointsQueryStore dataPointsQueryStore) {
+    public KairosDBStore(DataServiceConfigProperties config, DataServiceMetrics metrics, DataPointsQueryStore dataPointsQueryStore, Tracer tracer) {
         this.metrics = metrics;
         this.config = config;
         this.dataPointsQueryStore = dataPointsQueryStore;
@@ -86,6 +90,8 @@ public class KairosDBStore {
         } else {
             this.entityTagFields = new HashSet<>(config.getKairosdbTagFields());
         }
+
+        this.tracer = tracer;
     }
 
     public static String extractMetricName(String key) {
@@ -124,6 +130,9 @@ public class KairosDBStore {
     }
 
     void store(WorkerResult wr) {
+
+        Span span =tracer.activeSpan();
+
         if (!config.isKairosdbEnabled()) {
             return;
         }
@@ -151,7 +160,23 @@ public class KairosDBStore {
 
                 fillFlatValueMap(values, "", cd.checkResult.get("value"));
 
+                int count = 0;
+
+                if(span != null){
+                    span.setTag("keys_count", values.size());
+                }
+
                 for (Map.Entry<String, NumericNode> e : values.entrySet()) {
+
+                    if(count++ >= config.getMaxKeys())
+                    {
+                        LOG.warn("Too many keys:{} produced by check:{}. Dropping keys more than permissible limit.", values.size(), timeSeries);
+                        if(span != null){
+                            span.setTag("more_keys", Boolean.TRUE);
+                        }
+
+                        break;
+                    }
                     DataPoint p = new DataPoint();
                     p.name = timeSeries;
 
